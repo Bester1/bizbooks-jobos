@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Percent, UploadCloud } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
 
 type Tx = { date: string; desc: string; amt: number; cat: string };
 
@@ -17,13 +16,14 @@ export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [txs, setTxs] = useState(mockTxs);
 
-  const onDrop = (files: File[]) => {
-    const newTx: Tx = { date: new Date().toLocaleDateString(), desc: files[0].name, amt: -150, cat: 'New Sub' };
-    setTxs([newTx, ...txs]);
-    setIsOpen(false);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files[0]) {
+      const newTx: Tx = { date: new Date().toLocaleDateString(), desc: files[0].name, amt: -150, cat: 'New Sub' };
+      setTxs([newTx, ...txs]);
+      setIsOpen(false);
+    }
   };
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, noKeyboard: true });
 
   return (
     <main className="min-h-screen p-8 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -66,19 +66,20 @@ export default function Home() {
           onClick={() => setIsOpen(false)}
         >
           <div
-            {...getRootProps()}
-            className="w-full max-w-4xl p-12 border-4 border-dashed border-neon rounded-3xl glow-xl text-center cursor-pointer hover:glow-2xl transition-all"
+            className="w-full max-w-4xl p-12 border-4 border-dashed border-neon rounded-3xl glow-xl text-center"
+            onClick={(e) => e.stopPropagation()}
           >
-            <input {...getInputProps()} />
-            {isDragActive ? (
-              <p className="text-neon text-2xl">Drop PDF...</p>
-            ) : (
-              <>
-                <UploadCloud className="w-32 h-32 text-neon mx-auto mb-8 animate-pulse" />
-                <h2 className="text-4xl font-black mb-4">Drop Bank Statement</h2>
-                <p className="text-xl opacity-75 mb-12">We&apos;ll auto-match & categorize</p>
-              </>
-            )}
+            <UploadCloud className="w-32 h-32 text-neon mx-auto mb-8 animate-pulse" />
+            <h2 className="text-4xl font-black mb-4">Drop Bank Statement</h2>
+            <p className="text-xl opacity-75 mb-12">We&apos;ll auto-match & categorize</p>
+            
+            <input 
+              type="file" 
+              accept=".pdf,.csv,.xlsx" 
+              onChange={handleFileSelect}
+              className="mb-8 block mx-auto text-neon file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-neon file:text-black hover:file:bg-neon/80"
+            />
+            
             <div className="mt-12">
               <h3 className="text-2xl font-bold mb-6">Recent Transactions</h3>
               <div className="grid grid-cols-4 gap-4 text-left bg-black/50 rounded-2xl p-6 overflow-x-auto">
